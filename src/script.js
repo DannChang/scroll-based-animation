@@ -1,6 +1,7 @@
 import './style.css'
 import * as THREE from 'three'
 import * as dat from 'lil-gui'
+import gsap from 'gsap' 
 
 /**
  * Debug
@@ -154,10 +155,31 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
  * Scroll 
  */
 let scrollY = window.scrollY; // To be accessed by object camera in tick()
+let currentSection = 0;
+
 
 window.addEventListener('scroll', () => {
     scrollY = window.scrollY
-    // console.log(scrollY);
+    // console.log(scrollY / sizes.height);
+
+    const newSection = Math.round(scrollY / sizes.height);
+    // console.log(newSection)
+
+    if(newSection != currentSection) {
+        currentSection = newSection
+        // Animates on section change
+        gsap.to(
+            sectionMeshes[currentSection].rotation,
+            {
+                duration: 1.5,
+                ease: 'power2.inOut',
+                x: '+=6',
+                y: '+=3',
+                z: '+=1.5'
+            }
+        )
+        console.log('changed: ', currentSection)
+    }
 })
 
 /**
@@ -173,7 +195,7 @@ window.addEventListener('mousemove', (event) => {
     cursor.x = event.clientX / sizes.width;
     cursor.y = event.clientY / sizes.height;
 
-    console.log(cursor)
+    // console.log(cursor)
 })
 
 /**
@@ -200,8 +222,8 @@ const tick = () =>
 
     // Animate meshes
     sectionMeshes.forEach(mesh => {
-        mesh.rotation.x = elapsedTime * 0.1;
-        mesh.rotation.y = elapsedTime * 0.52;
+        mesh.rotation.x += deltaTime * 0.1;
+        mesh.rotation.y += deltaTime * 0.52;
     })
 
     // Render
