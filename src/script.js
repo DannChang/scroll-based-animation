@@ -60,7 +60,7 @@ mesh3.position.y = objectDistance * 2;
 mesh3.scale.set(0.5, 0.5, 0.5)
 
 mesh1.position.x = 2;
-mesh2.position.x = -2;
+mesh2.position.x = -1;
 mesh3.position.x = 2;
 
 
@@ -70,7 +70,30 @@ scene.add(mesh1, mesh2, mesh3)
 const sectionMeshes = [ mesh1, mesh2, mesh3 ]
 
 
+/**
+ * Particles
+ */
+const particlesCount = 400;
+const positions = new Float32Array(particlesCount * sectionMeshes.length)
 
+for(let i = 0; i< particlesCount; i++) {
+    positions[i * 3 + 0] = (Math.random() - 0.5) * 10;
+    positions[i * 3 + 1] = objectDistance * 0.5 + Math.random() * objectDistance * 3  + 3 ;
+    positions[i * 3 + 2] = (Math.random() - 0.5) * 10;
+}
+
+const particlesGeometry = new THREE.BufferGeometry()
+particlesGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3))
+
+// Particle Material
+const particlesMaterial = new THREE.PointsMaterial({
+    color: parameters.materialColor,
+    sizeAttenuation: true,
+    size: 0.03
+})
+
+const particles = new THREE.Points(particlesGeometry, particlesMaterial);
+scene.add(particles)
 
 
 /**
@@ -157,19 +180,22 @@ window.addEventListener('mousemove', (event) => {
  * Animate
  */
 const clock = new THREE.Clock()
+let previousTime = 0
 
 const tick = () =>
 {
-    const elapsedTime = clock.getElapsedTime()
+    const elapsedTime = clock.getElapsedTime();
+    const deltaTime = elapsedTime - previousTime;
+    previousTime = elapsedTime;
 
     // ANimate camera
     camera.position.y = scrollY / sizes.height * objectDistance;
 
     // Move cursor according to parrallax
     const parallaxX = cursor.x;
-    const parallaxY = cursor.y;
-    cameraGroup.position.x +=  (parallaxX - cameraGroup.position.x) * 0.1;
-    cameraGroup.position.y +=  (parallaxY - cameraGroup.position.y) * 0.1;
+    const parallaxY = - cursor.y;
+    cameraGroup.position.x +=  (parallaxX - cameraGroup.position.x) * 5 * deltaTime;
+    cameraGroup.position.y +=  (parallaxY - cameraGroup.position.y) * 5 * deltaTime;
 
 
     // Animate meshes
